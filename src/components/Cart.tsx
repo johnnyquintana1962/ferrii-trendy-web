@@ -19,15 +19,15 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose, items, onRemoveItem
     const total = items.reduce((sum, item) => sum + (item.precio || 0) * item.quantity, 0);
 
     const generateWhatsAppMessage = () => {
-        let message = `Hola Ferrii Trendy! 👋 Quiero estos productos:%0A%0A`;
+        let message = `¡Hola! Quiero hacer el siguiente pedido:%0A`;
 
         items.forEach(item => {
-            message += `• *${item.nombre}*${item.talle ? ` (Talle: ${item.talle})` : ''} - Gs. ${item.precio?.toLocaleString('es-PY') || 'A consultar'}%0A`;
+            message += `- ${item.nombre}${item.talle ? ` (Talle: ${item.talle})` : ''} - Gs. ${item.precio?.toLocaleString('es-PY') || 'A consultar'}%0A`;
         });
 
-        if (total > 0) {
-            message += `%0A💰 *Total: Gs. ${total.toLocaleString('es-PY')}*`;
-        }
+        message += `---%0A`;
+        message += `Total estimado: Gs. ${total.toLocaleString('es-PY')}%0A%0A`;
+        message += `¿Me confirman disponibilidad?`;
 
         return `https://wa.me/595981630337?text=${message}`;
     };

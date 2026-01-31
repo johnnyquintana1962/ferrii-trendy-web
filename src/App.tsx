@@ -244,9 +244,24 @@ function App() {
                 )}
             </main>
 
-            <Footer />
             <FloatingWhatsApp />
             <BottomNav />
+
+            {/* BOTÓN FLOTANTE DE PEDIDO */}
+            {cartCount > 0 && (
+                <button
+                    onClick={() => setIsCartOpen(true)}
+                    className="fixed bottom-24 lg:bottom-12 right-6 z-[90] bg-brand-brown text-white px-8 py-5 rounded-full font-black uppercase tracking-widest shadow-2xl hover:bg-black transition-all hover:scale-105 active:scale-95 flex items-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-500"
+                >
+                    <div className="relative">
+                        <ShoppingCart className="w-6 h-6" />
+                        <span className="absolute -top-3 -right-3 bg-white text-brand-brown text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-black">
+                            {cartCount}
+                        </span>
+                    </div>
+                    <span>Ver Pedido</span>
+                </button>
+            )}
 
             <Cart
                 isOpen={isCartOpen} onClose={() => setIsCartOpen(false)}
