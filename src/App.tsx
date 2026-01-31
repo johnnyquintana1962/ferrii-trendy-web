@@ -40,7 +40,7 @@ function App() {
     // Navigation & URL Filtering Logic
     useEffect(() => {
         const handleNavigation = () => {
-            const hashFull = window.location.hash || '#inicio';
+            const hashFull = window.location.hash;
             const hashBase = hashFull.split('?')[0];
             const params = new URLSearchParams(hashFull.split('?')[1] || '');
 
