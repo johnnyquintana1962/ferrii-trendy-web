@@ -25,10 +25,11 @@ export const Offers: React.FC<OffersProps> = ({ products, onAddToCart, onViewDet
                 </div>
 
                 <div className="flex gap-8 overflow-x-auto pb-12 snap-x snap-mandatory pt-4 px-4 -mx-4 scrollbar-hide">
-                    {offers.map(product => (
+                    {offers.map((product, index) => (
                         <div key={product.id} className="min-w-[300px] w-[300px] md:min-w-[340px] md:w-[340px] snap-start">
                             <ProductCard
                                 product={product}
+                                index={index}
                                 onAddToCart={onAddToCart}
                                 onViewDetails={onViewDetails}
                             />
