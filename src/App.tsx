@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { ShoppingCart } from 'lucide-react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { Categories } from './components/Categories';
@@ -244,6 +245,7 @@ function App() {
                 )}
             </main>
 
+            <Footer />
             <FloatingWhatsApp />
             <BottomNav />
 

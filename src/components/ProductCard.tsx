@@ -69,6 +69,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, index, onAddT
                     src={images[currentImgIdx]}
                     alt={`${product.nombre} - ${currentImgIdx}`}
                     priority={index < 4}
+                    size="thumbnail"
                     className="group-hover:scale-110 transition-transform duration-1000 h-full w-full object-cover"
                 />
 

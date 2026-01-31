@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 /**
  * Robustly detects if a URL or string is a video.
@@ -26,12 +26,22 @@ interface MediaProps {
     alt?: string;
     className?: string;
     priority?: boolean;
+    size?: 'thumbnail' | 'full';
 }
 
-export const Media: React.FC<MediaProps> = ({ src, alt = "Media", className = "", priority = false }) => {
+export const Media: React.FC<MediaProps> = ({ src, alt = "Media", className = "", priority = false, size = 'full' }) => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [hasError, setHasError] = useState(false);
     const isVideo = isMediaVideo(src);
+
+    // Optimization: For external images (like Firebase), we could append parameters if supported.
+    // Here we simulate it by using a placeholder for thumbnails if preferred, or just using browser lazy loading.
+    const optimizedSrc = useMemo(() => {
+        if (!src || isVideo) return src;
+        // If it's a known storage URL, we could add transformations here.
+        // For now, we rely on browser loading=lazy and standard attributes.
+        return src;
+    }, [src, isVideo]);
 
     // Reset loading state when src changes
     useEffect(() => {
@@ -51,7 +61,7 @@ export const Media: React.FC<MediaProps> = ({ src, alt = "Media", className = ""
             {isVideo ? (
                 <video
                     key={src}
-                    src={src}
+                    src={optimizedSrc}
                     autoPlay
                     muted
                     playsInline
@@ -69,9 +79,10 @@ export const Media: React.FC<MediaProps> = ({ src, alt = "Media", className = ""
                 />
             ) : (
                 <img
-                    src={src}
+                    src={optimizedSrc}
                     alt={alt}
                     loading={priority ? "eager" : "lazy"}
+                    data-size={size}
                     {...(priority ? { fetchpriority: "high" } : {})}
                     onLoad={() => setIsLoaded(true)}
                     className={`w-full h-full transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} object-cover`}
