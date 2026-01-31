@@ -3,6 +3,7 @@ import { Product, Settings, Category } from '../types';
 import { Plus, Trash2, Home, Upload, Edit3, Save, RotateCcw, Settings as SettingsIcon, ShoppingBag, Video, LogOut, Loader2 } from 'lucide-react';
 import { uploadFile } from '../services/firebaseService';
 import { Media } from './Media';
+import logo from '/logo.jpg';
 
 interface AdminProps {
     products: Product[];
@@ -386,7 +387,7 @@ export const Admin: React.FC<AdminProps> = ({ products, settings, onAddProduct, 
                 <div className="p-8 border-b border-brand-brown/5 flex items-center justify-between lg:justify-center">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand-brown/10 ring-4 ring-brand-brown/5">
-                            <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
+                            <img src={logo} alt="Logo" className="w-full h-full object-cover" />
                         </div>
                         <span className="font-serif font-black text-brand-brown text-xl tracking-tighter">Panel Admin</span>
                     </div>
@@ -560,8 +561,8 @@ export const Admin: React.FC<AdminProps> = ({ products, settings, onAddProduct, 
                                         type="submit"
                                         disabled={isUploading}
                                         className={`w-full py-6 rounded-[1.5rem] font-black uppercase tracking-[0.3em] transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3 ${isUploading
-                                                ? 'bg-gray-400 cursor-not-allowed opacity-50'
-                                                : 'bg-brand-brown text-white hover:bg-black'
+                                            ? 'bg-gray-400 cursor-not-allowed opacity-50'
+                                            : 'bg-brand-brown text-white hover:bg-black'
                                             }`}
                                     >
                                         {isUploading ? (

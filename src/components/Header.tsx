@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShoppingBag, Menu, X, Search } from 'lucide-react';
+import logo from '/logo.jpg';
 
 interface HeaderProps {
     cartCount: number;
@@ -31,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({ cartCount, searchTerm, onSearchC
 
                     <a href="#inicio" className="flex items-center gap-3 group">
                         <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-brand-brown/10 shadow-sm group-hover:scale-105 transition-transform duration-300">
-                            <img src="/logo.jpg" alt="Ferrii Trendy Logo" className="w-full h-full object-cover" />
+                            <img src={logo} alt="Ferrii Trendy Logo" className="w-full h-full object-cover" />
                         </div>
                         <div className="hidden sm:block text-2xl font-bold tracking-tighter text-brand-brown font-serif group-hover:opacity-70 transition-opacity">
                             Ferrii <span className="font-sans font-light">Trendy</span>
