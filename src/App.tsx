@@ -41,10 +41,11 @@ function App() {
     useEffect(() => {
         const handleNavigation = () => {
             const hashFull = window.location.hash || '#inicio';
-            const [hashBase, queryString] = hashFull.split('?');
-            const params = new URLSearchParams(queryString || '');
+            const hashBase = hashFull.split('?')[0];
+            const params = new URLSearchParams(hashFull.split('?')[1] || '');
 
-            const target = hashBase.replace('#', '').toLowerCase();
+            const pathName = window.location.pathname.replace('/', '').toLowerCase();
+            const target = (hashBase.replace('#', '') || pathName || 'inicio').toLowerCase();
             const urlFiltro = params.get('filtro');
             const urlCat = params.get('categoria');
 
