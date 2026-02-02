@@ -67,10 +67,10 @@ export const Hero: React.FC<HeroProps> = ({ videos }) => {
                     </span>
                     <h1 className="text-6xl md:text-8xl font-black text-white mb-8 leading-[0.9] tracking-tighter drop-shadow-2xl">
                         JOYAS Y MODA <br />
-                        <span className="font-serif italic font-normal text-brand-cream/90">de Vanguardia</span>
+                        <span className="font-serif italic font-normal text-brand-cream/90">Exclusiva</span>
                     </h1>
                     <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-2xl mx-auto font-medium leading-relaxed drop-shadow">
-                        Descubre una colección única seleccionada para resaltar tu brillo propio. Calidad premium en cada detalle.
+                        En Ferrii Trendy, nos comprometemos a ofrecer bijouterie y joyas de acero inoxidable de alta calidad, con diseños modernos y personalizados que reflejan el estilo y la identidad de cada cliente.
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">

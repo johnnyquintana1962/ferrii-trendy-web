@@ -97,7 +97,7 @@ export const Footer: React.FC = () => {
                 </div>
 
                 <div className="mt-12 pt-8 border-t border-white/10 text-center text-xs text-brand-cream/40 font-bold uppercase tracking-widest">
-                    © {new Date().getFullYear()} Ferrii Trendy. Joyas y Moda de Vanguardia.
+                    © {new Date().getFullYear()} Ferrii Trendy. Joyas y Accesorios Exclusivos.
                 </div>
             </div>
         </footer>
