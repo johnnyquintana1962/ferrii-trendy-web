@@ -67,7 +67,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, index, onAddT
             <div className="relative aspect-square overflow-hidden bg-brand-cream/10 cursor-pointer" onClick={() => onViewDetails(product)}>
                 <Media
                     src={images[currentImgIdx]}
-                    alt={`${product.nombre} - ${currentImgIdx}`}
+                    alt={`${product.nombre} - Ferrii Trendy (Ferri Trendy) - ${currentImgIdx + 1}`}
                     priority={index < 4}
                     size="thumbnail"
                     className="group-hover:scale-110 transition-transform duration-1000 h-full w-full object-cover"
