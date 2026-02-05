@@ -53,8 +53,8 @@ export const Media: React.FC<MediaProps> = ({ src, alt = "Media", className = ""
         <div className={`relative w-full h-full overflow-hidden flex items-center justify-center ${className}`}>
             {/* Loading Indicator / Skeleton */}
             {!isLoaded && src !== 'https://placehold.co/400x400?text=No+Image' && (
-                <div className="absolute inset-0 flex items-center justify-center bg-brand-cream/10 animate-pulse">
-                    <div className="w-8 h-8 border-2 border-brand-brown/20 border-t-brand-brown rounded-full animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center bg-brand-cream/10 dark:bg-white/5 animate-pulse">
+                    <div className="w-8 h-8 border-2 border-brand-brown/20 dark:border-white/20 border-t-brand-brown dark:border-t-white rounded-full animate-spin" />
                 </div>
             )}
 
@@ -96,12 +96,12 @@ export const Media: React.FC<MediaProps> = ({ src, alt = "Media", className = ""
 
             {/* Final fallback only if there is a real error or no src */}
             {(hasError || (src === '') || (!src)) && (
-                <div className="absolute inset-0 bg-gray-200 flex flex-col items-center justify-center p-4">
-                    <div className="w-10 h-10 border-2 border-brand-brown/10 rounded-full flex items-center justify-center mb-2">
-                        <span className="text-[10px] font-black text-brand-brown/40">!</span>
+                <div className="absolute inset-0 bg-gray-200 dark:bg-[#1a1a1a] flex flex-col items-center justify-center p-4">
+                    <div className="w-10 h-10 border-2 border-brand-brown/10 dark:border-white/10 rounded-full flex items-center justify-center mb-2">
+                        <span className="text-[10px] font-black text-brand-brown/40 dark:text-white/40">!</span>
                     </div>
                     {/* Optional text only if space allows */}
-                    <span className="text-[8px] font-black text-brand-brown/20 uppercase tracking-widest text-center">No disponible</span>
+                    <span className="text-[8px] font-black text-brand-brown/20 dark:text-white/20 uppercase tracking-widest text-center">No disponible</span>
                 </div>
             )}
         </div>
