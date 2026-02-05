@@ -19,17 +19,18 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose, items, onRemoveItem
     const total = items.reduce((sum, item) => sum + (item.precio || 0) * item.quantity, 0);
 
     const generateWhatsAppMessage = () => {
-        let message = `¡Hola! Quiero hacer el siguiente pedido:%0A`;
+        let message = `¡Hola! Quiero hacer el siguiente pedido:\n\n`;
 
         items.forEach(item => {
-            message += `- ${item.nombre}${item.talle ? ` [Talle: ${item.talle}]` : ''} - Gs. ${item.precio?.toLocaleString('es-PY') || 'A consultar'}%0A`;
+            const shortDesc = item.descripcion ? ` (${item.descripcion.split('\n')[0].substring(0, 50)}...)` : '';
+            message += `- *${item.nombre}*${shortDesc}${item.talle ? ` [Talle: ${item.talle}]` : ''} - Gs. ${item.precio?.toLocaleString('es-PY') || 'A consultar'}\n`;
         });
 
-        message += `---%0A`;
-        message += `Total estimado: Gs. ${total.toLocaleString('es-PY')}%0A%0A`;
+        message += `\n---\n`;
+        message += `*Total estimado: Gs. ${total.toLocaleString('es-PY')}*\n\n`;
         message += `¿Me confirman disponibilidad?`;
 
-        return `https://wa.me/595981630337?text=${message}`;
+        return `https://wa.me/595981630337?text=${encodeURIComponent(message)}`;
     };
 
     const whatsappLink = generateWhatsAppMessage();

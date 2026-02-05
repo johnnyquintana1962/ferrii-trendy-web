@@ -73,7 +73,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, allProducts
         setCurrentImgIdx(prev => (prev - 1 + images.length) % images.length);
     };
 
-    const whatsappText = `¡Hola! 👋 Quisiera más información sobre: *${product.nombre}* - ${product.descripcion?.split('\n')[0].substring(0, 100) || 'Sin descripción'}`;
+    const whatsappText = `¡Hola! 👋 Quisiera consultar sobre este producto: *${product.nombre}*\n\nDetalles:\n${product.descripcion || 'Sin descripción'}`;
     const whatsappLink = `https://wa.me/595981630337?text=${encodeURIComponent(whatsappText)}`;
 
     // Simple Next Image Preload logic

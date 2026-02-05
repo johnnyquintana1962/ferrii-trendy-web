@@ -57,7 +57,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, index, onAddT
         setShowSizeError(false);
     };
 
-    const whatsappText = `¡Hola! 👋 Quisiera consultar sobre: *${product.nombre}* - ${product.descripcion?.split('\n')[0].substring(0, 100) || 'Sin descripción'}`;
+    const whatsappText = `¡Hola! 👋 Quisiera consultar sobre este producto: *${product.nombre}*\n\nDetalles:\n${product.descripcion || 'Sin descripción'}`;
     const whatsappLink = `https://wa.me/595981630337?text=${encodeURIComponent(whatsappText)}`;
 
     return (
