@@ -22,7 +22,7 @@ export const Cart: React.FC<CartProps> = ({ isOpen, onClose, items, onRemoveItem
         let message = `¡Hola! Quiero hacer el siguiente pedido:%0A`;
 
         items.forEach(item => {
-            message += `- ${item.nombre} (ID: ${item.id})${item.talle ? ` [Talle: ${item.talle}]` : ''} - Gs. ${item.precio?.toLocaleString('es-PY') || 'A consultar'}%0A`;
+            message += `- ${item.nombre}${item.talle ? ` [Talle: ${item.talle}]` : ''} - Gs. ${item.precio?.toLocaleString('es-PY') || 'A consultar'}%0A`;
         });
 
         message += `---%0A`;
