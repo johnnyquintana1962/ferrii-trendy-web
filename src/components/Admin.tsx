@@ -3,6 +3,7 @@ import { Product, Settings, Category } from '../types';
 import { Plus, Trash2, Home, Upload, Edit3, Save, RotateCcw, Settings as SettingsIcon, ShoppingBag, Video, LogOut, Loader2 } from 'lucide-react';
 import { uploadFile } from '../services/firebaseService';
 import { Media } from './Media';
+import { compressImage } from '../utils/imageCompression';
 import logo from '/logo.jpg';
 
 interface AdminProps {
@@ -100,39 +101,37 @@ export const Admin: React.FC<AdminProps> = ({ products, settings, onAddProduct, 
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
-        files.forEach(file => {
-            // Check size (10MB)
-            if (file.size > 10 * 1024 * 1024) {
-                alert(`El archivo ${file.name} es muy pesado para esta versión (máx 10MB).`);
-                return;
-            }
 
+        for (const file of files) {
             if (file.type.startsWith('video/')) {
+                // Check video size (20MB as per firebaseService.js limit)
+                if (file.size > 20 * 1024 * 1024) {
+                    alert(`El video ${file.name} es muy pesado (máx 20MB).`);
+                    continue;
+                }
                 // Use URL.createObjectURL for videos to avoid localStorage bloat
                 const videoUrl = URL.createObjectURL(file);
                 setFormData(prev => ({
                     ...prev,
                     imagenes: [...prev.imagenes, videoUrl]
                 }));
-            } else {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    const result = reader.result as string;
-                    if (result.length > 2 * 1024 * 1024) {
-                        alert("La imagen es demasiado pesada para el almacenamiento del navegador.");
-                        return;
-                    }
+            } else if (file.type.startsWith('image/')) {
+                try {
+                    // Compress image before adding to state
+                    const { dataUrl } = await compressImage(file);
+
                     setFormData(prev => ({
                         ...prev,
-                        imagenes: [...prev.imagenes, result]
+                        imagenes: [...prev.imagenes, dataUrl]
                     }));
-                };
-                reader.onerror = (err) => console.error("Error leyendo archivo:", err);
-                reader.readAsDataURL(file);
+                } catch (err) {
+                    console.error("Error comprimiendo imagen:", err);
+                    alert(`Error al procesar ${file.name}`);
+                }
             }
-        });
+        }
     };
 
     const handleLocalVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -204,10 +203,18 @@ export const Admin: React.FC<AdminProps> = ({ products, settings, onAddProduct, 
         if (!file) return;
 
         setIsUploading(true);
-        setUploadingFile(`Subiendo imagen de ${catForm[categoryIndex].name}...`);
+        setUploadingFile(`Optimizando y subiendo imagen de ${catForm[categoryIndex].name}...`);
 
         try {
-            const downloadURL = await uploadFile(file, 'categories', (progress) => {
+            // Compress image before uploading to Firebase
+            const { blob } = await compressImage(file);
+
+            // Create a File object from the blob to maintain compatibility with uploadFile
+            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                type: 'image/jpeg'
+            });
+
+            const downloadURL = await uploadFile(compressedFile, 'categories', (progress) => {
                 setUploadProgress(progress);
             });
 
@@ -221,7 +228,7 @@ export const Admin: React.FC<AdminProps> = ({ products, settings, onAddProduct, 
             alert('✅ Imagen de categoría actualizada');
         } catch (error) {
             console.error('Upload error:', error);
-            alert('❌ Error al subir imagen');
+            alert('❌ Error al procesar o subir la imagen');
         } finally {
             setIsUploading(false);
             setUploadProgress(0);
