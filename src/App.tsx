@@ -63,14 +63,27 @@ function App() {
                 else if (urlFiltro === 'nueva') setActiveFilter('nueva');
                 else setActiveFilter('all');
 
-                // Set Categories from dynamic settings
-                const categories = (settings?.categories || []).map(c => c.id);
-                if (categories.includes(target)) {
-                    setSelectedCategory(target);
-                } else if (urlCat && categories.includes(urlCat.toLowerCase())) {
-                    setSelectedCategory(urlCat.toLowerCase());
+                // Set Categories dynamically from available product categories
+                const allAvailableCats = Array.from(new Set(products.map(p => (p.categoria || '').toLowerCase().trim())));
+                const targetLower = target.toLowerCase();
+                const urlCatLower = urlCat?.toLowerCase().trim();
+
+                if (allAvailableCats.includes(targetLower)) {
+                    setSelectedCategory(targetLower);
+                    // Force refresh state for a "clean" view when switching categories
+                    setSearchTerm('');
+                    if (!urlFiltro) setActiveFilter('all');
+                } else if (urlCatLower && allAvailableCats.includes(urlCatLower)) {
+                    setSelectedCategory(urlCatLower);
+                    setSearchTerm('');
+                    if (!urlFiltro) setActiveFilter('all');
                 } else {
                     setSelectedCategory('todos');
+                    // Only reset if we are going back to "inicio"
+                    if (target === 'inicio' || target === '') {
+                        setSearchTerm('');
+                        setActiveFilter('all');
+                    }
                 }
 
                 // Scroll Logic: Improved for better reliability
@@ -102,12 +115,41 @@ function App() {
         handleNavigation();
         window.addEventListener('hashchange', handleNavigation);
         return () => window.removeEventListener('hashchange', handleNavigation);
-    }, [refreshProducts, settings]); // Sync with settings too
+    }, [refreshProducts, settings, products]); // Added products to dependencies
+
+    // Derived Categories Logic: Merge settings with actual product categories
+    // This ensures that products in 'Trajes de Baño' show up even if not explicitly in settings
+    const displayCategories = (() => {
+        const configCats = settings?.categories || [];
+        const productCats = Array.from(new Set(products.map(p => (p.categoria || '').trim()).filter(Boolean)));
+
+        let finalCats: any[] = [...configCats];
+
+        // Add categories found in products that aren't in config
+        productCats.forEach(pCat => {
+            const pCatId = pCat.toLowerCase();
+            if (!configCats.some(c => c.id === pCatId)) {
+                finalCats.push({
+                    id: pCatId,
+                    name: pCat, // Keep original casing for name
+                    imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000', // Default
+                    order: 99 // Last by default
+                });
+            }
+        });
+
+        return finalCats.sort((a, b) => a.order - b.order);
+    })();
 
 
+    // Optimized product filtering for exact matches
     const filteredProducts = products.filter(p => {
-        const matchesCategory = selectedCategory === 'todos' || p.categoria.toLowerCase() === selectedCategory.toLowerCase();
-        const matchesSearch = p.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+        // Compare using both slugified version and exact string to ensure reliability
+        const productCat = (p.categoria || '').trim().toLowerCase();
+        const selectedCat = selectedCategory.trim().toLowerCase();
+
+        const matchesCategory = selectedCategory === 'todos' || productCat === selectedCat;
+        const matchesSearch = (p.nombre || '').toLowerCase().includes(searchTerm.toLowerCase());
         const matchesFilter = activeFilter === 'all'
             ? true
             : activeFilter === 'oferta' ? p.oferta : p.nueva_coleccion;
@@ -215,7 +257,7 @@ function App() {
                 {loading ? <Loading /> : (
                     <>
                         {/* 1. CATEGORÍAS PRIMERO (con botones Ofertas/Novedades incluidos) */}
-                        <Categories categories={settings.categories || []} />
+                        <Categories categories={displayCategories} />
 
                         {/* 2. CATÁLOGO DIRECTO - Sin sección de Ofertas */}
                         <section id="catalogo" className="container mx-auto px-2 md:px-4 py-12 md:py-24 scroll-mt-24">
@@ -223,7 +265,13 @@ function App() {
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-16 gap-6">
                                 <div className="flex-1">
                                     <h2 className="text-4xl md:text-7xl font-black font-serif text-brand-brown uppercase tracking-tighter leading-none mb-4">
-                                        {activeFilter === 'oferta' ? 'Grandes Ofertas' : activeFilter === 'nueva' ? 'Nueva Colección' : selectedCategory === 'todos' ? 'Nuestra Colección' : selectedCategory}
+                                        {activeFilter === 'oferta'
+                                            ? 'Grandes Ofertas'
+                                            : activeFilter === 'nueva'
+                                                ? 'Nueva Colección'
+                                                : selectedCategory === 'todos'
+                                                    ? 'Nuestra Colección'
+                                                    : (displayCategories.find(c => c.id === selectedCategory)?.name || selectedCategory)}
                                     </h2>
                                     <p className="text-brand-brown/40 font-black uppercase tracking-[0.4em] text-[10px]">Piezas seleccionadas con alma</p>
                                 </div>

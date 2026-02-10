@@ -81,14 +81,17 @@ export const Admin: React.FC<AdminProps> = ({ products, settings, onAddProduct, 
 
     const handleEdit = (product: Product) => {
         setEditingId(product.id);
-        const currentCats = (settings?.categories || []).map(c => c.id);
-        const isCustom = !currentCats.includes(product.categoria.toLowerCase());
+        const cat = (product.categoria || '').trim();
+        const catLower = cat.toLowerCase();
+
+        // Check if it's in settings (by ID or Name)
+        const isInSettings = (settings?.categories || []).some(c => c.id === catLower || c.name.toLowerCase() === catLower);
 
         setFormData({
             nombre: product.nombre,
             descripcion: product.descripcion,
-            categoria: isCustom ? 'other' : product.categoria.toLowerCase(),
-            customCategoria: isCustom ? product.categoria : '',
+            categoria: isInSettings ? catLower : cat,
+            customCategoria: '',
             precio: product.precio?.toString() || '',
             imagenes: product.imagenes || [],
             stock_inmediato: product.stock_inmediato,
@@ -96,7 +99,7 @@ export const Admin: React.FC<AdminProps> = ({ products, settings, onAddProduct, 
             nueva_coleccion: product.nueva_coleccion || false,
             talles: product.talles?.join(', ') || ''
         });
-        setShowCustomCat(isCustom);
+        setShowCustomCat(false);
         setActiveTab('products');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -476,10 +479,21 @@ export const Admin: React.FC<AdminProps> = ({ products, settings, onAddProduct, 
                                                 required
                                             >
                                                 <option value="" disabled className="dark:bg-[#1a1a1a]">Seleccione una categoría...</option>
+
+                                                {/* Predefined Categories from Settings */}
                                                 {(settings.categories || []).slice().sort((a, b) => a.name.localeCompare(b.name)).map(cat => (
                                                     <option key={cat.id} value={cat.id} className="dark:bg-[#1a1a1a]">{cat.name}</option>
                                                 ))}
-                                                <option value="other" className="dark:bg-[#1a1a1a]">Otros (Especificar abajo)</option>
+
+                                                {/* Categories found in other products but not in settings */}
+                                                {Array.from(new Set(products.map(p => p.categoria)))
+                                                    .filter(cat => cat && !(settings.categories || []).some(c => c.id === cat.toLowerCase() || c.name.toLowerCase() === cat.toLowerCase()))
+                                                    .map(cat => (
+                                                        <option key={cat} value={cat} className="dark:bg-[#1a1a1a]">{cat}</option>
+                                                    ))
+                                                }
+
+                                                <option value="other" className="dark:bg-[#1a1a1a]">Nueva Categoría personalizada...</option>
                                             </select>
                                         </div>
                                     </div>
