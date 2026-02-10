@@ -485,14 +485,6 @@ export const Admin: React.FC<AdminProps> = ({ products, settings, onAddProduct, 
                                                     <option key={cat.id} value={cat.id} className="dark:bg-[#1a1a1a]">{cat.name}</option>
                                                 ))}
 
-                                                {/* Categories found in other products but not in settings */}
-                                                {Array.from(new Set(products.map(p => p.categoria)))
-                                                    .filter(cat => cat && !(settings.categories || []).some(c => c.id === cat.toLowerCase() || c.name.toLowerCase() === cat.toLowerCase()))
-                                                    .map(cat => (
-                                                        <option key={cat} value={cat} className="dark:bg-[#1a1a1a]">{cat}</option>
-                                                    ))
-                                                }
-
                                                 <option value="other" className="dark:bg-[#1a1a1a]">Nueva Categoría personalizada...</option>
                                             </select>
                                         </div>

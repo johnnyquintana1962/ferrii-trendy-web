@@ -42,13 +42,13 @@ function App() {
     useEffect(() => {
         const handleNavigation = () => {
             const hashFull = window.location.hash;
-            const hashBase = hashFull.split('?')[0];
+            const hashBase = decodeURIComponent(hashFull.split('?')[0]);
             const params = new URLSearchParams(hashFull.split('?')[1] || '');
 
-            const pathName = window.location.pathname.replace('/', '').toLowerCase();
-            const target = (hashBase.replace('#', '') || pathName || 'inicio').toLowerCase();
+            const pathName = decodeURIComponent(window.location.pathname.replace('/', '')).toLowerCase();
+            const target = (hashBase.replace('#', '') || pathName || 'inicio').toLowerCase().trim();
             const urlFiltro = params.get('filtro');
-            const urlCat = params.get('categoria');
+            const urlCat = decodeURIComponent(params.get('categoria') || '').toLowerCase().trim();
 
             // Firebase real-time subscriptions handle data sync automatically
 
@@ -117,34 +117,16 @@ function App() {
         return () => window.removeEventListener('hashchange', handleNavigation);
     }, [refreshProducts, settings, products]); // Added products to dependencies
 
-    // Derived Categories Logic: Merge settings with actual product categories
-    // This ensures that products in 'Trajes de Baño' show up even if not explicitly in settings
+    // Derived Categories Logic: Strictly from Admin Settings
     const displayCategories = (() => {
         const configCats = settings?.categories || [];
-        const productCats = Array.from(new Set(products.map(p => (p.categoria || '').trim()).filter(Boolean)));
-
-        let finalCats: any[] = [...configCats];
-
-        // Add categories found in products that aren't in config
-        productCats.forEach(pCat => {
-            const pCatId = pCat.toLowerCase();
-            if (!configCats.some(c => c.id === pCatId)) {
-                finalCats.push({
-                    id: pCatId,
-                    name: pCat, // Keep original casing for name
-                    imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000', // Default
-                    order: 99 // Last by default
-                });
-            }
-        });
-
-        return finalCats.sort((a, b) => a.order - b.order);
+        return [...configCats].sort((a, b) => a.order - b.order);
     })();
 
 
     // Optimized product filtering for exact matches
     const filteredProducts = products.filter(p => {
-        // Compare using both slugified version and exact string to ensure reliability
+        // CRITICAL SYNC: Using 'categoria' field consistently with Admin
         const productCat = (p.categoria || '').trim().toLowerCase();
         const selectedCat = selectedCategory.trim().toLowerCase();
 
@@ -277,7 +259,7 @@ function App() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-10">
+                            <div key={`${selectedCategory}-${activeFilter}-${searchTerm}`} className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-10">
                                 {filteredProducts.map((product, index) => (
                                     <ProductCard
                                         key={product.id}
