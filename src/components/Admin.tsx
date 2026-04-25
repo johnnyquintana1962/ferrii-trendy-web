@@ -88,16 +88,16 @@ export const Admin: React.FC<AdminProps> = ({ products, settings, onAddProduct, 
         const isInSettings = (settings?.categories || []).some(c => c.id === catLower || c.name.toLowerCase() === catLower);
 
         setFormData({
-            nombre: product.nombre,
-            descripcion: product.descripcion,
+            nombre: product.nombre || '',
+            descripcion: product.descripcion || '',
             categoria: isInSettings ? catLower : cat,
             customCategoria: '',
-            precio: product.precio?.toString() || '',
+            precio: product.precio !== null && product.precio !== undefined ? product.precio.toString() : '',
             imagenes: product.imagenes || [],
-            stock_inmediato: product.stock_inmediato,
-            oferta: product.oferta || false,
-            nueva_coleccion: product.nueva_coleccion || false,
-            talles: product.talles?.join(', ') || ''
+            stock_inmediato: product.stock_inmediato ?? true,
+            oferta: product.oferta ?? false,
+            nueva_coleccion: product.nueva_coleccion ?? false,
+            talles: Array.isArray(product.talles) ? product.talles.join(', ') : (typeof product.talles === 'string' ? product.talles : '')
         });
         setShowCustomCat(false);
         setActiveTab('products');
@@ -581,8 +581,8 @@ export const Admin: React.FC<AdminProps> = ({ products, settings, onAddProduct, 
 
                             <div className="space-y-4 max-h-[800px] overflow-y-auto pr-2 custom-scrollbar">
                                 {products
-                                    .filter(p => filterCategory === 'todos' || p.categoria.toLowerCase() === filterCategory.toLowerCase())
-                                    .map(product => {
+                                .filter(p => filterCategory === 'todos' || (p.categoria || '').toLowerCase() === filterCategory.toLowerCase())
+                                .map(product => {
                                         // Accept blob URLs as valid during session, data URLs, and http URLs
                                         const hasMultimedia = product.imagenes && product.imagenes.length > 0 &&
                                             (product.imagenes[0].startsWith('blob:') ||

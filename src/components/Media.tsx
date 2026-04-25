@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
  * Robustly detects if a URL or string is a video.
  */
 export const isMediaVideo = (src: string): boolean => {
-    if (!src) return false;
+    if (!src || typeof src !== 'string') return false;
     const lower = src.toLowerCase();
 
     // Explicit blob/data check
@@ -37,10 +37,24 @@ export const Media: React.FC<MediaProps> = ({ src, alt = "Media", className = ""
     // Optimization: For external images (like Firebase), we could append parameters if supported.
     // Here we simulate it by using a placeholder for thumbnails if preferred, or just using browser lazy loading.
     const optimizedSrc = useMemo(() => {
-        if (!src || isVideo) return src;
-        // If it's a known storage URL, we could add transformations here.
-        // For now, we rely on browser loading=lazy and standard attributes.
-        return src;
+        if (!src || typeof src !== 'string') return src;
+        let urlStr = src;
+
+        // Firebase Storage Token Stripping:
+        // Si el token almacenado fue revocado, al quitarlo se fuerza a Firebase a usar 
+        // las reglas públicas de lectura (allow read: if true;). Esto cura las imágenes rotas.
+        if (urlStr.includes('firebasestorage.googleapis.com') && urlStr.includes('token=')) {
+            try {
+                const url = new URL(urlStr);
+                url.searchParams.delete('token');
+                urlStr = url.toString();
+            } catch (e) {
+                // Ignorar error de parsing
+            }
+        }
+
+        if (isVideo) return urlStr;
+        return urlStr;
     }, [src, isVideo]);
 
     // Reset loading state when src changes

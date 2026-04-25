@@ -15,10 +15,23 @@ export const useProducts = () => {
     useEffect(() => {
         setLoading(true);
 
-        const unsubscribe = subscribeToProducts((updatedProducts) => {
-            setProducts(updatedProducts as Product[]);
-            setLoading(false);
-        });
+        const unsubscribe = subscribeToProducts(
+            (updatedProducts) => {
+                // Sort locally so we don't exclude products missing the 'createdAt' field
+                const sorted = [...(updatedProducts as Product[])].sort((a, b) => {
+                    const timeA = a.createdAt?.toMillis?.() || a.createdAt || 0;
+                    const timeB = b.createdAt?.toMillis?.() || b.createdAt || 0;
+                    return timeB - timeA;
+                });
+                setProducts(sorted);
+                setLoading(false);
+            },
+            (error: any) => {
+                console.error("Subscription error caught in useProducts:", error);
+                setLoading(false);
+                alert("⚠️ Error al conectar con la base de datos (Firestore). Por favor revisa las reglas de seguridad en Firebase.");
+            }
+        );
 
         // Cleanup subscription on unmount
         return () => unsubscribe();

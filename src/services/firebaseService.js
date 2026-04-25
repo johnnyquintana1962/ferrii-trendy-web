@@ -34,7 +34,7 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB limit
 export const getAllProducts = async () => {
     try {
         const productsRef = collection(db, PRODUCTS_COLLECTION);
-        const q = query(productsRef, orderBy('createdAt', 'desc'));
+        const q = query(productsRef);
         const snapshot = await getDocs(q);
 
         return snapshot.docs.map(doc => ({
@@ -50,9 +50,9 @@ export const getAllProducts = async () => {
 /**
  * Subscribe to real-time products updates
  */
-export const subscribeToProducts = (callback) => {
+export const subscribeToProducts = (callback, onError) => {
     const productsRef = collection(db, PRODUCTS_COLLECTION);
-    const q = query(productsRef, orderBy('createdAt', 'desc'));
+    const q = query(productsRef); // Remove orderBy to prevent excluding items without createdAt
 
     return onSnapshot(q, (snapshot) => {
         const products = snapshot.docs.map(doc => ({
@@ -62,6 +62,7 @@ export const subscribeToProducts = (callback) => {
         callback(products);
     }, (error) => {
         console.error('Error in products subscription:', error);
+        if (onError) onError(error);
     });
 };
 

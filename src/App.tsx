@@ -35,7 +35,7 @@ function App() {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem('admin_session') === 'active');
 
-    const { products, loading, addProduct, updateProduct, deleteProduct, setAllProducts, refreshProducts, clearDatabase } = useProducts();
+    const { products, loading, addProduct, updateProduct, deleteProduct, refreshProducts, clearDatabase } = useProducts();
     const { settings, updateSettings } = useSettings();
 
     // Navigation & URL Filtering Logic
@@ -181,41 +181,6 @@ function App() {
                     onDeleteProduct={deleteProduct}
                     onLogout={handleLogout}
                     onUpdateSettings={(newSettings) => {
-                        // Category sync logic - now using categories array
-                        const oldCats = (settings.categories || []).map(c => c.id);
-                        const newCats = (newSettings.categories || []).map(c => c.id);
-
-                        let updatedProducts = [...products];
-                        let productsChanged = false;
-
-                        // 1. Handle Renames (index based)
-                        oldCats.forEach((oldCat, idx) => {
-                            const newCat = newCats[idx];
-                            if (newCat && oldCat !== newCat) {
-                                updatedProducts = updatedProducts.map(p =>
-                                    p.categoria.toLowerCase() === oldCat
-                                        ? { ...p, categoria: newCat }
-                                        : p
-                                );
-                                productsChanged = true;
-                            }
-                        });
-
-                        // 2. Handle Deletions: If a category is gone, move its products to 'Sin Categoría'
-                        const removedCats = oldCats.filter(old => !newCats.includes(old));
-                        if (removedCats.length > 0) {
-                            updatedProducts = updatedProducts.map(p =>
-                                removedCats.includes(p.categoria.toLowerCase())
-                                    ? { ...p, categoria: 'Sin Categoría' }
-                                    : p
-                            );
-                            productsChanged = true;
-                        }
-
-                        if (productsChanged) {
-                            setAllProducts(updatedProducts);
-                        }
-
                         updateSettings(newSettings);
                     }}
                     onClearDatabase={clearDatabase}
