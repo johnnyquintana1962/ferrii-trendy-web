@@ -84,6 +84,7 @@ export const Media: React.FC<MediaProps> = ({ src, alt = "Media", className = ""
                     src={optimizedSrc}
                     alt={alt}
                     loading={priority ? "eager" : "lazy"}
+                    decoding="async"
                     data-size={size}
                     {...(priority ? { fetchpriority: "high" } : {})}
                     onLoad={() => setIsLoaded(true)}

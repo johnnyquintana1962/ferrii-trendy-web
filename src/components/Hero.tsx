@@ -23,36 +23,37 @@ export const Hero: React.FC<HeroProps> = ({ videos }) => {
 
     return (
         <section className="relative h-[85vh] md:h-[90vh] w-full overflow-hidden bg-brand-brown">
-            {/* Multi-Video Background with CROSS-FADE */}
+            {/* Fondo de video: se reproduce SOLO el video visible (no todos a la vez).
+                Antes se montaban y autoreproducían los 3 videos en simultáneo, lo que
+                hacía que la página se trabara al entrar y consumiera mucha memoria. */}
             <div className="absolute inset-0">
-                {videoList.map((video, idx) => {
-                    const isActive = idx === currentIndex;
-
+                {(() => {
+                    const video = videoList[currentIndex] || videoList[0];
+                    const src = video.includes(' ') && !video.startsWith('data:') ? encodeURI(video) : video;
                     return (
                         <video
-                            key={`${video}-${idx}`}
+                            key={`${video}-${currentIndex}`}
                             autoPlay
                             loop
                             muted
                             playsInline
                             onContextMenu={(e) => e.preventDefault()}
                             onTimeUpdate={(e) => {
-                                // Limit to 15 seconds as requested
+                                // Limitar a 15 segundos como se pidió
                                 if (e.currentTarget.currentTime > 15) {
                                     e.currentTarget.currentTime = 0;
                                 }
                             }}
                             onError={() => {
-                                setCurrentIndex(prev => (prev + 1) % videoList.length);
+                                if (videoList.length > 1) setCurrentIndex(prev => (prev + 1) % videoList.length);
                             }}
                             preload="metadata"
-                            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[3000ms] ease-in-out ${isActive ? 'opacity-80' : 'opacity-0'
-                                }`}
+                            className="absolute inset-0 w-full h-full object-cover opacity-80 animate-in fade-in duration-1000 ease-in-out"
                         >
-                            <source src={video.includes(' ') && !video.startsWith('data:') ? encodeURI(video) : video} type="video/mp4" />
+                            <source src={src} type="video/mp4" />
                         </video>
                     );
-                })}
+                })()}
 
                 {/* Overlays for depth and readability */}
                 <div className="absolute inset-0 bg-black/40 z-10" />
