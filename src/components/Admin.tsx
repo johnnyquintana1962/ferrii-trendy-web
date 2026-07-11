@@ -285,42 +285,61 @@ export const Admin: React.FC<AdminProps> = ({ products, settings, onAddProduct, 
         setUploadingFile('Procesando imágenes...');
 
         try {
-            // CRITICAL FIX: Upload all images to Firebase Storage using Promise.all
-            const uploadedImageUrls: string[] = [];
-            const imagesToUpload: File[] = [];
+            // Subir imágenes a Storage y generar una MINIATURA liviana (~500px) por
+            // cada foto nueva, para que la grilla del catálogo cargue rápido y use
+            // poca memoria. `thumbnails` queda alineado (mismo orden) con `imagenes`.
+            const editingProduct = editingId ? products.find(p => p.id === editingId) : null;
+            const thumbOfExisting = (url: string) => {
+                const i = editingProduct?.imagenes?.indexOf(url) ?? -1;
+                return (i >= 0 && editingProduct?.thumbnails?.[i]) || url;
+            };
 
-            // Separate already-uploaded URLs from new files that need uploading
+            const uploadedImageUrls: string[] = [];
+            const thumbnailUrls: string[] = [];
+            const newItems: { file: File; isVideo: boolean }[] = [];
+
+            // Separar URLs ya subidas de archivos nuevos que hay que subir
             for (const img of formData.imagenes) {
                 if (img.startsWith('http')) {
-                    // Already uploaded to Firebase
                     uploadedImageUrls.push(img);
+                    thumbnailUrls.push(thumbOfExisting(img)); // conserva miniatura previa si existe
                 } else if (img.startsWith('blob:') || img.startsWith('data:')) {
-                    // Need to convert to File and upload
                     try {
                         const response = await fetch(img);
                         const blob = await response.blob();
-                        const filename = `product-${Date.now()}-${imagesToUpload.length}.${blob.type.split('/')[1] || 'jpg'}`;
-                        const file = new File([blob], filename, { type: blob.type });
-                        imagesToUpload.push(file);
+                        const isVid = blob.type.startsWith('video/');
+                        const ext = blob.type.split('/')[1] || (isVid ? 'mp4' : 'jpg');
+                        const filename = `product-${Date.now()}-${newItems.length}.${ext}`;
+                        newItems.push({ file: new File([blob], filename, { type: blob.type }), isVideo: isVid });
                     } catch (err) {
                         console.error('Error converting image:', err);
                     }
                 }
             }
 
-            // Upload all new files in parallel using Promise.all
-            if (imagesToUpload.length > 0) {
-                setUploadingFile(`Subiendo ${imagesToUpload.length} archivo(s)...`);
+            // Subir archivos nuevos (foto grande + su miniatura)
+            if (newItems.length > 0) {
+                setUploadingFile(`Subiendo ${newItems.length} archivo(s)...`);
+                let uploadedCount = 0;
+                for (const { file, isVideo } of newItems) {
+                    const fullUrl = await uploadFile(file, 'products', (progress) => {
+                        setUploadProgress(Math.round(((uploadedCount + progress / 100) / newItems.length) * 100));
+                    });
+                    uploadedImageUrls.push(fullUrl);
 
-                const uploadPromises = imagesToUpload.map((file) =>
-                    uploadFile(file, 'products', (progress) => {
-                        setUploadProgress(Math.round(progress / imagesToUpload.length));
-                    })
-                );
-
-                // Wait for ALL uploads to complete
-                const newUrls = await Promise.all(uploadPromises);
-                uploadedImageUrls.push(...newUrls);
+                    if (isVideo) {
+                        thumbnailUrls.push(fullUrl); // los videos no llevan miniatura
+                    } else {
+                        try {
+                            const { blob } = await compressImage(file, 500, 0.72);
+                            const thumbFile = new File([blob], file.name.replace(/\.\w+$/, '') + '-thumb.jpg', { type: 'image/jpeg' });
+                            thumbnailUrls.push(await uploadFile(thumbFile, 'thumbs', () => { }));
+                        } catch {
+                            thumbnailUrls.push(fullUrl); // si falla, la grilla usa la foto grande
+                        }
+                    }
+                    uploadedCount++;
+                }
             }
 
             // Now save to Firestore with all confirmed URLs
@@ -332,6 +351,7 @@ export const Admin: React.FC<AdminProps> = ({ products, settings, onAddProduct, 
                 categoria: finalCategoria,
                 precio: formData.precio ? Number(formData.precio) : null,
                 imagenes: uploadedImageUrls.length > 0 ? uploadedImageUrls : ['https://placehold.co/400x400?text=No+Image'],
+                thumbnails: thumbnailUrls.length > 0 ? thumbnailUrls : [],
                 stock_inmediato: formData.stock_inmediato,
                 oferta: formData.oferta,
                 nueva_coleccion: formData.nueva_coleccion,
@@ -598,7 +618,7 @@ export const Admin: React.FC<AdminProps> = ({ products, settings, onAddProduct, 
                                                             <Video className="w-6 h-6 text-red-300" />
                                                         </div>
                                                     )}
-                                                    <Media src={product.imagenes?.[0] || ''} className="w-full h-full object-cover" />
+                                                    <Media src={product.thumbnails?.[0] || product.imagenes?.[0] || ''} className="w-full h-full object-cover" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2">
@@ -640,7 +660,7 @@ export const Admin: React.FC<AdminProps> = ({ products, settings, onAddProduct, 
                                                 <td className="px-8 py-4 border-b border-brand-brown/5 dark:border-white/5">
                                                     <div className="flex items-center gap-4">
                                                         <div className="w-12 h-12 rounded-xl overflow-hidden shadow-sm flex-shrink-0">
-                                                            <Media src={product.imagenes?.[0] || ''} className="w-full h-full object-cover" />
+                                                            <Media src={product.thumbnails?.[0] || product.imagenes?.[0] || ''} className="w-full h-full object-cover" />
                                                         </div>
                                                         <span className="font-bold text-brand-brown dark:text-white">{product.nombre}</span>
                                                     </div>

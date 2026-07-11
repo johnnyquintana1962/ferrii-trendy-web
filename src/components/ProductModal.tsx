@@ -233,7 +233,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ product, allProducts
                                 {relatedProducts.map(rp => (
                                     <div key={rp?.id} className="group cursor-pointer" onClick={() => onViewProduct?.(rp)}>
                                         <div className="aspect-[3/4] rounded-2xl overflow-hidden mb-3 bg-brand-cream/10">
-                                            <Media src={rp?.imagenes?.[0] || 'https://placehold.co/400x400?text=No+Image'} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                            <Media src={rp?.thumbnails?.[0] || rp?.imagenes?.[0] || 'https://placehold.co/400x400?text=No+Image'} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                                         </div>
                                         <p className="text-[10px] font-black text-brand-brown truncate uppercase">{rp?.nombre}</p>
                                     </div>

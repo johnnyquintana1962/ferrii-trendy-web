@@ -9,6 +9,7 @@ export interface Product {
     oferta: boolean;
     nueva_coleccion: boolean;
     talles?: string[];
+    thumbnails?: string[];  // Miniaturas livianas (~500px) paralelas a `imagenes`, para la grilla
     createdAt?: any;   // Timestamp de Firestore (opcional: productos antiguos no lo tienen)
     updatedAt?: any;
 }

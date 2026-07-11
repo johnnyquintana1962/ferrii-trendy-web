@@ -31,6 +31,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, index, onAddT
         });
     }, [product.imagenes]);
 
+    // Mapa foto original -> miniatura liviana (para que la grilla cargue rápido).
+    // La foto grande se usa solo al abrir el producto (ProductModal).
+    const thumbFor = React.useCallback((url: string) => {
+        const idx = (product.imagenes || []).indexOf(url);
+        return (idx >= 0 && product.thumbnails?.[idx]) || url;
+    }, [product.imagenes, product.thumbnails]);
+
     const nextImg = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -67,7 +74,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, index, onAddT
             {/* Image Section - Forced Square for grid consistency */}
             <div className="relative aspect-square overflow-hidden bg-brand-cream/10 cursor-pointer" onClick={() => onViewDetails(product)}>
                 <Media
-                    src={images[currentImgIdx]}
+                    src={thumbFor(images[currentImgIdx])}
                     alt={`${product.nombre} - Ferrii Trendy (Ferri Trendy) - ${currentImgIdx + 1}`}
                     priority={index < 4}
                     size="thumbnail"
