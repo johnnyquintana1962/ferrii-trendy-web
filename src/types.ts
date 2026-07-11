@@ -9,6 +9,8 @@ export interface Product {
     oferta: boolean;
     nueva_coleccion: boolean;
     talles?: string[];
+    createdAt?: any;   // Timestamp de Firestore (opcional: productos antiguos no lo tienen)
+    updatedAt?: any;
 }
 
 export interface Category {

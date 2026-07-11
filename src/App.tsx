@@ -12,7 +12,7 @@ import { FloatingWhatsApp } from './components/FloatingWhatsApp';
 import { BottomNav } from './components/BottomNav';
 import { useProducts } from './hooks/useProducts';
 import { useSettings } from './hooks/useSettings';
-import { Product } from './types';
+import { Product, Category } from './types';
 import { Suspense, lazy } from 'react';
 import './utils/cleanupLocalStorage'; // Auto-cleanup old LocalStorage data
 
@@ -117,10 +117,28 @@ function App() {
         return () => window.removeEventListener('hashchange', handleNavigation);
     }, [refreshProducts, settings, products]); // Added products to dependencies
 
-    // Derived Categories Logic: Strictly from Admin Settings
+    // Categorías del menú: las configuradas en el Admin +, como red de seguridad,
+    // cualquier categoría que tenga productos pero que NO esté configurada. Así ningún
+    // catálogo vuelve a quedar "colgado" (sin sección de navegación) si se agrega un
+    // producto con una categoría nueva y se olvida crearla en Configuración.
     const displayCategories = (() => {
         const configCats = settings?.categories || [];
-        return [...configCats].sort((a, b) => a.order - b.order);
+        const known = new Set(configCats.map(c => (c.id || '').toLowerCase().trim()));
+        const derived: Category[] = [];
+        let nextOrder = configCats.reduce((m, c) => Math.max(m, c.order || 0), -1) + 1;
+        products.forEach(p => {
+            const id = (p.categoria || '').toLowerCase().trim();
+            if (!id || known.has(id)) return;
+            known.add(id);
+            const img = (p.imagenes || []).find(u => typeof u === 'string' && u.startsWith('http')) || '';
+            derived.push({
+                id,
+                name: id.replace(/\b\w/g, c => c.toUpperCase()),
+                imageUrl: img,
+                order: nextOrder++
+            });
+        });
+        return [...configCats, ...derived].sort((a, b) => a.order - b.order);
     })();
 
 

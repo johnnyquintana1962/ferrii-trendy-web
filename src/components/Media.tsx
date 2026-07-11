@@ -38,24 +38,12 @@ export const Media: React.FC<MediaProps> = ({ src, alt = "Media", className = ""
     // Here we simulate it by using a placeholder for thumbnails if preferred, or just using browser lazy loading.
     const optimizedSrc = useMemo(() => {
         if (!src || typeof src !== 'string') return src;
-        let urlStr = src;
-
-        // Firebase Storage Token Stripping:
-        // Si el token almacenado fue revocado, al quitarlo se fuerza a Firebase a usar 
-        // las reglas públicas de lectura (allow read: if true;). Esto cura las imágenes rotas.
-        if (urlStr.includes('firebasestorage.googleapis.com') && urlStr.includes('token=')) {
-            try {
-                const url = new URL(urlStr);
-                url.searchParams.delete('token');
-                urlStr = url.toString();
-            } catch (e) {
-                // Ignorar error de parsing
-            }
-        }
-
-        if (isVideo) return urlStr;
-        return urlStr;
-    }, [src, isVideo]);
+        // IMPORTANTE: No modificar las URLs de Firebase Storage.
+        // El parámetro `token` es justamente lo que autoriza la lectura pública de la
+        // imagen; quitarlo hace que Firebase responda 403 y la foto "desaparezca"
+        // en cuanto las reglas del Storage dejen de ser totalmente públicas.
+        return src;
+    }, [src]);
 
     // Reset loading state when src changes
     useEffect(() => {

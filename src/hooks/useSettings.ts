@@ -69,21 +69,15 @@ export const useSettings = () => {
                 }
             }
 
-            // Initialize with defaults if completely empty
+            // Si no hay categorías configuradas, usamos las de defecto SOLO para mostrar
+            // localmente. NO las guardamos en Firestore: escribir aquí sobrescribía las
+            // categorías reales de la clienta (ej. "Aros"/"Pulseras") con las 4 por defecto.
             if (!finalSettings.categories || finalSettings.categories.length === 0) {
-                if (!initialized) {
-                    finalSettings = {
-                        heroVideos: updatedSettings.heroVideos || defaultSettings.heroVideos,
-                        categories: defaultSettings.categories
-                    };
-
-                    try {
-                        await updateSettingsInFirebase(finalSettings);
-                        setInitialized(true);
-                    } catch (error) {
-                        console.error('Error initializing default categories:', error);
-                    }
-                }
+                finalSettings = {
+                    ...finalSettings,
+                    heroVideos: updatedSettings.heroVideos || defaultSettings.heroVideos,
+                    categories: defaultSettings.categories
+                };
             }
 
             setSettings(finalSettings);

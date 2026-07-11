@@ -32,7 +32,7 @@ export interface FirebaseSettings {
 export type ProgressCallback = (progress: number) => void;
 
 export declare function getAllProducts(): Promise<FirebaseProduct[]>;
-export declare function subscribeToProducts(callback: (products: FirebaseProduct[]) => void): () => void;
+export declare function subscribeToProducts(callback: (products: FirebaseProduct[]) => void, onError?: (error: any) => void): () => void;
 export declare function addProduct(productData: Partial<FirebaseProduct>): Promise<string>;
 export declare function updateProduct(productId: string, productData: Partial<FirebaseProduct>): Promise<void>;
 export declare function deleteProduct(productId: string, mediaUrls?: string[]): Promise<void>;
